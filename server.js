@@ -10,10 +10,12 @@ app.post('/status', (req, res) => {
     req.body.forEach(entry => {
         const projectName = entry.name;
         const statusType = entry.status.status;
+        const listId = entry.id; // Capture the list id
 
         if (!projects[projectName]) {
             projects[projectName] = {
                 project: projectName,
+                listId: listId, // Include the list id in the project object
                 approved: 0,
                 check: 0,
                 editing: 0,
