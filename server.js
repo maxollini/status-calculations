@@ -5,55 +5,48 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 
 app.post('/status', (req, res) => {
-    const projects = req.body;
-    let results = [];
+    const projects = {};
 
-    projects.forEach(project => {
-        const { name, status } = project;
-        const statusCounts = {
-            approved: 0,
-            check: 0,
-            editing: 0,
-            written: 0,
-            idea: 0
-        };
+    req.body.forEach(entry => {
+        const projectName = entry.name;
+        const statusType = entry.status.status;
 
-        projects.forEach(p => {
-            if (p.name === name) {
-                statusCounts[p.status.status] = (statusCounts[p.status.status] || 0) + 1;
-            }
-        });
-
-        let decision = "";
-
-        if (statusCounts.approved >= 24) {
-            decision = "All good -> equals to or more than 24 approved";
-        } else if (statusCounts.approved >= 6 && statusCounts.check >= 12) {
-            decision = "Needs approval -> 6 or more in approved but less than 24, equals to or more than 12 check";
-        } else if (statusCounts.approved >= 6 && statusCounts.check < 12 && statusCounts.editing >= 12) {
-            decision = "Needs editing -> 6 or more in approved but less than 24, less than 12 check, equals to or more than 12 editing";
-        } else if (statusCounts.approved >= 6 && statusCounts.check < 12 && statusCounts.editing < 12 && statusCounts.written >= 12) {
-            decision = "Needs writing approval -> 6 or more in approved but less than 24, less than 12 check, less than 12 editing, equals to or more than 12 written";
-        } else if (statusCounts.approved >= 6 && statusCounts.check < 12 && statusCounts.editing < 12 && statusCounts.written < 12 && statusCounts.idea >= 24) {
-            decision = "Needs more writing -> 6 or more in approved but less than 24, less than 12 check, less than 12 editing, less than 12 written, equals to or more than 24 idea";
-        } else if (statusCounts.approved >= 6 && statusCounts.check < 12 && statusCounts.editing < 12 && statusCounts.written < 12 && statusCounts.idea < 24) {
-            decision = "Needs more ideas -> 6 or more in approved but less than 24, less than 12 check, less than 12 editing, less than 12 written, less than 24 idea";
-        } else {
-            decision = "Big problem -> less than 6 in approved";
+        if (!projects[projectName]) {
+            projects[projectName] = {
+                project: projectName,
+                approved: 0,
+                check: 0,
+                editing: 0,
+                written: 0,
+                idea: 0,
+                decision: ""
+            };
         }
-
-        results.push({
-            project: name,
-            decision: decision,
-            approved: statusCounts.approved,
-            check: statusCounts.check,
-            editing: statusCounts.editing,
-            written: statusCounts.written,
-            idea: statusCounts.idea
-        });
+        
+        projects[projectName][statusType] = (projects[projectName][statusType] || 0) + 1;
     });
 
-    res.json(results);
+    Object.values(projects).forEach(project => {
+        const { approved, check, editing, written, idea } = project;
+
+        if (approved >= 24) {
+            project.decision = "All good -> equals to or more than 24 approved";
+        } else if (approved >= 6 && check >= 12) {
+            project.decision = "Needs approval -> 6 or more in approved but less than 24, equals to or more than 12 check";
+        } else if (approved >= 6 && check < 12 && editing >= 12) {
+            project.decision = "Needs editing -> 6 or more in approved but less than 24, less than 12 check, equals to or more than 12 editing";
+        } else if (approved >= 6 && check < 12 && editing < 12 && written >= 12) {
+            project.decision = "Needs writing approval -> 6 or more in approved but less than 24, less than 12 check, less than 12 editing, equals to or more than 12 written";
+        } else if (approved >= 6 && check < 12 && editing < 12 && written < 12 && idea >= 24) {
+            project.decision = "Needs more writing -> 6 or more in approved but less than 24, less than 12 check, less than 12 editing, less than 12 written, equals to or more than 24 idea";
+        } else if (approved >= 6 && check < 12 && editing < 12 && written < 12 && idea < 24) {
+            project.decision = "Needs more ideas -> 6 or more in approved but less than 24, less than 12 check, less than 12 editing, less than 12 written, less than 24 idea";
+        } else {
+            project.decision = "Big problem -> less than 6 in approved";
+        }
+    });
+
+    res.json(Object.values(projects));
 });
 
 app.listen(PORT, () => {
