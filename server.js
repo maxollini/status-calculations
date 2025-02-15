@@ -31,7 +31,9 @@ app.post('/status', (req, res) => {
     Object.values(projects).forEach(project => {
         const { approved, check, editing, written, idea } = project;
 
-        if (approved >= 18) {
+        if (approved < 6 && check < 6) {
+            project.decision = "Big problem -> less than 6 in approved AND less than 6 in check";
+        } else if (approved >= 18) {
             project.decision = "All good -> equals to or more than 18 approved";
         } else if (approved >= 6 && check >= 12) {
             project.decision = "Needs approval -> 6 or more in approved but less than 18, equals to or more than 12 check";
@@ -43,8 +45,6 @@ app.post('/status', (req, res) => {
             project.decision = "Needs more writing -> 6 or more in approved but less than 18, less than 12 check, less than 12 editing, less than 12 written, equals to or more than 12 idea";
         } else if (approved >= 6 && check < 12 && editing < 12 && written < 12 && idea < 12) {
             project.decision = "Needs more ideas -> 6 or more in approved but less than 18, less than 12 check, less than 12 editing, less than 12 written, less than 12 idea";
-        } else {
-            project.decision = "Big problem -> less than 6 in approved";
         }
     });
 
