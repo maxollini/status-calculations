@@ -29,24 +29,14 @@ app.post('/status', (req, res) => {
     });
 
     Object.values(projects).forEach(project => {
-        const { approved, check, editing, written, idea } = project;
+        const { approved, check } = project;
 
         if (approved >= 18) {
             project.decision = "All good -> equals to or more than 18 approved";
-        } else if (approved >= 6 && check >= 12) {
-            project.decision = "Needs approval -> 6 or more in approved but less than 18, equals to or more than 12 check";
-        } else if (approved >= 6 && check < 12 && editing >= 12) {
-            project.decision = "Needs editing -> 6 or more in approved but less than 18, less than 12 check, equals to or more than 12 editing";
-        } else if (approved >= 6 && check < 12 && editing < 12 && written >= 12) {
-            project.decision = "Needs writing approval -> 6 or more in approved but less than 18, less than 12 check, less than 12 editing, equals to or more than 12 written";
-        } else if (approved >= 6 && check < 12 && editing < 12 && written < 12 && idea >= 12) {
-            project.decision = "Needs more writing -> 6 or more in approved but less than 18, less than 12 check, less than 12 editing, less than 12 written, equals to or more than 12 idea";
-        } else if (approved >= 6 && check < 12 && editing < 12 && written < 12 && idea < 12) {
-            project.decision = "Needs more ideas -> 6 or more in approved but less than 18, less than 12 check, less than 12 editing, less than 12 written, less than 12 idea";
-        } else if (approved < 6 && check >= 6) {
-            project.decision = "Small problem -> Less than 6 approved but 6 or more check";
-        } else {
+        } else if (approved < 6 && check < 6) {
             project.decision = "Big problem -> Less than 6 in approved and less than 6 in check";
+        } else {
+            project.decision = "Needs action -> Approved less than 18 but not a big problem";
         }
     });
 
